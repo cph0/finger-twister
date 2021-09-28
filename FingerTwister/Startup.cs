@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace FingerTwister
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -28,7 +26,7 @@ namespace FingerTwister
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc();
+            services.AddRazorPages();
 
             //SESSION
             // Adds a default in-memory implementation of IDistributedCache.
@@ -38,20 +36,15 @@ namespace FingerTwister
             {
                 // Set a short timeout for easy testing.
                 options.IdleTimeout = TimeSpan.FromMinutes(60);
-                options.CookieHttpOnly = true;
             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
             }
             else
             {
@@ -60,11 +53,12 @@ namespace FingerTwister
 
             app.UseStaticFiles();
             app.UseSession();
-            app.UseMvc(routes =>
+            app.UseRouting();
+
+            app.UseEndpoints(e =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                e.MapRazorPages();
+                e.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }
