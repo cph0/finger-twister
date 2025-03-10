@@ -11,9 +11,9 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-        List<int> buttons = new List<int>();
-        Dictionary<int, List<int>> players = new Dictionary<int, List<int>>();
-        Dictionary<int, int> scores = new Dictionary<int, int>();
+        var buttons = new List<int>();
+        var players = new Dictionary<int, List<int>>();
+        var scores = new Dictionary<int, int>();
 
         HttpContext.Session.Set("players", players);
         HttpContext.Session.Set("scores", scores);
@@ -26,14 +26,14 @@ public class HomeController : Controller
     [HttpPost]
     public IActionResult GetData(int id)
     {
-        Dictionary<int, List<int>> players = HttpContext.Session.Get<Dictionary<int, List<int>>>("players");
-        Dictionary<int, int> scores = HttpContext.Session.Get<Dictionary<int, int>>("scores");
-        Data model = new Data();
-        List<int> buttons = HttpContext.Session.Get<List<int>>("buttons");
-        int level = HttpContext.Session.Get<int>("level");
-        bool playerHasID = players.Any(w => w.Value.Contains(id));
+        var players = HttpContext.Session.Get<Dictionary<int, List<int>>>("players");
+        var scores = HttpContext.Session.Get<Dictionary<int, int>>("scores");
+        var model = new Data();
+        var buttons = HttpContext.Session.Get<List<int>>("buttons");
+        var level = HttpContext.Session.Get<int>("level");
+        var playerHasID = players.Any(w => w.Value.Contains(id));
         int currentPlayer;
-        bool started = false;
+        var started = false;
 
         if (playerHasID)
         {
@@ -49,13 +49,13 @@ public class HomeController : Controller
             else
                 maxPlayerID = players.Max(w => w.Key) + 1;
 
-            List<int> player = new List<int>() { id };
+            var player = new List<int>() { id };
             buttons.Add(id);
             players.Add(maxPlayerID, player);
             scores.Add(maxPlayerID, 0);
             currentPlayer = maxPlayerID;
 
-            if (players.Count(c => c.Value.Any()) == 3)
+            if (players.Count(c => c.Value.Count > 0) == 3)
                 started = true;
         }
 
@@ -80,10 +80,10 @@ public class HomeController : Controller
         }
         else if (buttons.Count == 11)
         {
-            List<int> full = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-            int nextID = full.Except(buttons).First();
+            var full = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+            var nextID = full.Except(buttons).First();
 
-            int index = buttons.Count <= level ? 0 : buttons.Count - level;
+            var index = buttons.Count <= level ? 0 : buttons.Count - level;
             model.lastID = buttons.ElementAt(index);
             model.nextID = nextID;
             buttons.Add(nextID);
@@ -93,16 +93,15 @@ public class HomeController : Controller
         }
         else
         {
-            Random gen = new Random();
-            int nextID = gen.Next(1, 12);
+            var gen = new Random();
+            var nextID = gen.Next(1, 12);
             while (buttons.Contains(nextID))
             {
                 nextID = gen.Next(1, 12);
             }
 
-            int index = buttons.Count <= level ? 0 : buttons.Count - level;
+            var index = buttons.Count <= level ? 0 : buttons.Count - level;
             model.lastID = buttons.ElementAt(index);
-
             model.nextID = nextID;
             buttons.Add(nextID);
 
@@ -110,8 +109,8 @@ public class HomeController : Controller
             scores[currentPlayer] += 1;
         }
 
-        string scoreString = "";
-        foreach (KeyValuePair<int, List<int>> player in players)
+        var scoreString = "";
+        foreach (var player in players)
         {
             if (player.Value.Count != 0)
                 scoreString = $"{scoreString} {scores[player.Key]}";
@@ -132,14 +131,14 @@ public class HomeController : Controller
     [HttpPost]
     public IActionResult SendData(int id)
     {
-        List<int> buttons = HttpContext.Session.Get<List<int>>("buttons");
-        Dictionary<int, List<int>> players = HttpContext.Session.Get<Dictionary<int, List<int>>>("players");
-        Dictionary<int, int> scores = HttpContext.Session.Get<Dictionary<int, int>>("scores");
-        bool playerHasID = players.Any(w => w.Value.Contains(id));
+        var buttons = HttpContext.Session.Get<List<int>>("buttons");
+        var players = HttpContext.Session.Get<Dictionary<int, List<int>>>("players");
+        var scores = HttpContext.Session.Get<Dictionary<int, int>>("scores");
+        var playerHasID = players.Any(w => w.Value.Contains(id));
 
         if (playerHasID)
         {
-            int currentPlayer = players.Where(w => w.Value.Contains(id)).FirstOrDefault().Key;
+            var currentPlayer = players.Where(w => w.Value.Contains(id)).FirstOrDefault().Key;
             players[currentPlayer].Remove(id);
             scores[currentPlayer] -= 1;
         }
